@@ -1,0 +1,51 @@
+//realTimeProducts.handlebars//
+
+<!doctype html>
+<html>
+<head>
+  <title>Lista de productos en tiempo real</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    socket.on('updateList', (products) => {
+      const list = document.getElementById('product-list');
+      list.innerHTML = '';
+      products.forEach((product) => {
+        const li = document.createElement('li');
+        li.innerText = `${product.name} - $${product.price}`;
+        list.appendChild(li);
+      });
+    });
+  </script>
+</head>
+<body>
+  <h1>Lista de productos en tiempo real</h1>
+  <ul id="product-list">
+    {{#each products}}
+      <li>{{this.name}} - ${{this.price}}</li>
+    {{/each}}
+  </ul>
+  <form id="add-product-form">
+    <label for="product-name">Nombre:</label>
+    <input type="text" id="product-name" name="name">
+    <br>
+    <label for="product-price">Precio:</label>
+    <input type="number" id="product-price" name="price">
+    <br>
+    <button type="submit">Agregar producto</button>
+  </form>
+  <script>
+    const form = document.getElementById('add-product-form');
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const nameInput = document.getElementById('product-name');
+      const priceInput = document.getElementById('product-price');
+      const name = nameInput.value;
+      const price = priceInput.value;
+      socket.emit('addProduct', { name, price });
+      nameInput.value = '';
+      priceInput.value = '';
+    });
+  </script>
+</body>
+</html>
